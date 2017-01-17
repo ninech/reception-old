@@ -107,8 +107,11 @@ The "main" container must be called `app`:
 
 ### Ports
 
-In your `docker-compose.yaml` file, you shall only expose the 'main' HTTP port.
-Also, you should not give a specific local port:
+In your `docker-compose.yaml` file, you shall only expose the 'main' HTTP port,
+because it's hard to reliably determine the HTTP port for the reverse proxy.
+Also, you should not give a specific local port when you work on multiple
+projects. The reverse proxy will bind to the random port assigned by Docker
+without any problems. This way you avoid port collisions across projects.
 
 **Do**
 
@@ -116,8 +119,11 @@ Also, you should not give a specific local port:
     services:
       app:
         image: nginx
+        depends_on: pgsql
         ports:
           - 80    <----- like this
+      pgsql:
+        image: postgresql
 
 **Don't**
 
@@ -125,5 +131,12 @@ Also, you should not give a specific local port:
     services:
       app:
         image: nginx
+        depends_on: pgsql
+        volume:
+          - ./php:/usr/share/nginx/html
         ports:
           - 80:80    <----- and _not_ like this
+      pgsql:
+        image: postgresql
+        ports:
+          - 5432:5432    <----- and _not_ like this
