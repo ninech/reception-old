@@ -63,9 +63,9 @@
 
 
       {{ if eq $app "app" }}
-      server_name {{ $host }};
+      server_name {{ $host }} *.{{ $host }};
       {{ else }}
-      server_name {{ $app }}.{{ $host }};
+      server_name {{ $app }}.{{ $host }} *.{{ $app }}.{{ $host }};
       {{ end }}
       proxy_buffering off;
       # error_log /proc/self/fd/2;
