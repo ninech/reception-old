@@ -8,11 +8,10 @@ It's built around [docker-gen](https://github.com/jwilder/docker-gen),
 
 ## Installation
 
-### dnsmasq
-
-For resolving the `.docker` local top-level domain to `localhost`, we rely on
-*dnsmasq*. We installed it locally and did not explore a Docker-based solution.
-
+For resolving the `.docker` local top-level domain to `localhost`, changes to
+your local configuration are required. We rely on *dnsmasq* for the resolution
+of `.docker` to `localhost`. We installed it locally and did not yet explore a
+Docker-based solution.
 
 ### Linux
 
@@ -58,7 +57,7 @@ Try to go to http://reception.docker.
 
 ### macOS
 
-Install *nginx*, *dnsmasq* and *docker-gen* using *[homebrew]*(http://brew.sh/):
+Install *nginx*, *dnsmasq* and *docker-gen* using *[homebrew](http://brew.sh/)*:
 
     brew install nginx dnsmasq docker-gen
 
@@ -101,7 +100,7 @@ The "main" container must be called `app`:
 
     version: '2'
     services:
-      app:    # <----- like this
+      app:    <----- like this
         image: nginx
         ports:
           - 80
@@ -118,7 +117,7 @@ Also, you should not give a specific local port:
       app:
         image: nginx
         ports:
-          - 80    # <----- like this
+          - 80    <----- like this
 
 **Don't**
 
@@ -127,4 +126,4 @@ Also, you should not give a specific local port:
       app:
         image: nginx
         ports:
-          - 80:80    # <----- and _not_ like this
+          - 80:80    <----- and _not_ like this
