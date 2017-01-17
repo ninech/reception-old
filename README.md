@@ -15,6 +15,8 @@ Docker-based solution.
 
 ### Linux
 
+**WARNING: The linux instructions are not yet thoroughly tested!**
+
 On Linux, you only need dnsmasq locally and *should* be able to nginx and
 docker-gen through `docker-compose up`.
 
