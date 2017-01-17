@@ -1,0 +1,20 @@
+version: '2'
+services:
+  dockergen:
+    build: .
+    depends_on:
+      - nginx
+    volumes:
+      - ./:/app/
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    volumes_from:
+      - nginx
+  nginx:
+    image: nginx:1.11-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    network_mode: "host"
+    volumes:
+      - /etc/nginx/conf.d/
+      - /usr/share/nginx/html/
