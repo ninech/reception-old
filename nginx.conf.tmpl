@@ -5,7 +5,7 @@
   # {{ $project }} ({{ len $containers }} containers)
   ##
 
-  {{ range $app, $containers := groupByLabel $ "com.docker.compose.service" }}
+  {{ range $app, $containers := groupByLabel $containers "com.docker.compose.service" }}
     {{ $app := trim $app }}
     {{ $host := trim $host }}
 
