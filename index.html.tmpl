@@ -43,109 +43,109 @@ tgl = function() {
 window.addEventListener('load', tgl)
 </script>
 <pre id="config" style="display: none">
-{{ range $project, $containers := groupByLabel $ "com.docker.compose.project" }}
-  {{ $host := replace "_host_.docker" "_host_" $project 1 }}
-
-  ##
-  # {{ $project }} ({{ len $containers }} containers)
-  ##
-
-  {{ range $app, $containers := groupByLabel $ "com.docker.compose.service" }}
-    {{ $app := trim $app }}
-    {{ $host := trim $host }}
+  {{ range $project, $containers := groupByLabel $ "com.docker.compose.project" }}
+    {{ $host := replace "_host_.docker" "_host_" $project 1 }}
 
     ##
-    # {{ $project }}.{{ $app }} ({{ len $containers }} containers)
+    # {{ $project }} ({{ len $containers }} containers)
     ##
 
-    {{ if eq $app "app" }}
-      upstream {{ $host }} {
-    {{ else }}
-      upstream {{ $app }}.{{ $host }} {
-    {{ end }}
-      {{ range $index, $value := $containers }}
-        {{ $addrLen := len $value.Addresses }}
-        {{ $network := index $value.Networks 0 }}
+    {{ range $app, $containers := groupByLabel $ "com.docker.compose.service" }}
+      {{ $app := trim $app }}
+      {{ $host := trim $host }}
 
-        # {{$value.Name}}
-        # Addresses: {{$addrLen}}
-
-        {{/* If only 1 port exposed, use that */}}
-        {{ if eq $addrLen 1 }}
-          {{ with $address := index $value.Addresses 0 }}
-            # server {{ $network.IP }}:{{ $address.Port }};
-            server localhost:{{ $address.HostPort }};
-          {{ end }}
-
-        {{/* If more than one port exposed, use the one matching VIRTUAL_PORT env var */}}
-        {{ else if $value.Env.VIRTUAL_PORT }}
-          {{ range $i, $address := $value.Addresses }}
-            {{ if eq $address.Port $value.Env.VIRTUAL_PORT }}
-              # server {{ $network.IP }}:{{ $address.Port }};
-              server localhost:{{ $address.HostPort }};
-            {{ end }}
-          {{ end }}
-
-        {{/* Else default to standard web port 80 */}}
-        {{ else }}
-          {{ range $i, $address := $value.Addresses }}
-            {{ if eq $address.Port "80" }}
-              # server {{ $network.IP }}:{{ $address.Port }};
-              server localhost:{{ $address.HostPort }};
-            {{ else if eq $address.Port "3000" }}
-              # server {{ $network.IP }}:{{ $address.Port }};
-              server localhost:{{ $address.HostPort }};
-            {{ end }}
-          {{ end }}
-        {{ end }}
-      {{ end }}
-    }
-
-    server {
-      listen 80;
-
-      gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
-
+      ##
+      # {{ $project }}.{{ $app }} ({{ len $containers }} containers)
+      ##
 
       {{ if eq $app "app" }}
-      server_name {{ $host }};
+        upstream {{ $host }} {
       {{ else }}
-      server_name {{ $app }}.{{ $host }};
+        upstream {{ $app }}.{{ $host }} {
       {{ end }}
-      proxy_buffering off;
-      # error_log /proc/self/fd/2;
-      # access_log /proc/self/fd/1;
+        {{ range $index, $value := $containers }}
+          {{ $addrLen := len $value.Addresses }}
+          {{ $network := index $value.Networks 0 }}
 
-      location / {
-        {{ if eq $app "app" }}
-          proxy_pass http://{{ $host }};
-        {{ else }}
-          proxy_pass http://{{ $app }}.{{ $host }};
+          # {{$value.Name}}
+          # Addresses: {{$addrLen}}
+
+          {{/* If only 1 port exposed, use that */}}
+          {{ if eq $addrLen 1 }}
+            {{ with $address := index $value.Addresses 0 }}
+              # server {{ $network.IP }}:{{ $address.Port }};
+              server localhost:{{ $address.HostPort }};
+            {{ end }}
+
+          {{/* If more than one port exposed, use the one matching VIRTUAL_PORT env var */}}
+          {{ else if $value.Env.VIRTUAL_PORT }}
+            {{ range $i, $address := $value.Addresses }}
+              {{ if eq $address.Port $value.Env.VIRTUAL_PORT }}
+                # server {{ $network.IP }}:{{ $address.Port }};
+                server localhost:{{ $address.HostPort }};
+              {{ end }}
+            {{ end }}
+
+          {{/* Else default to standard web port 80 */}}
+          {{ else }}
+            {{ range $i, $address := $value.Addresses }}
+              {{ if eq $address.Port "80" }}
+                # server {{ $network.IP }}:{{ $address.Port }};
+                server localhost:{{ $address.HostPort }};
+              {{ else if eq $address.Port "3000" }}
+                # server {{ $network.IP }}:{{ $address.Port }};
+                server localhost:{{ $address.HostPort }};
+              {{ end }}
+            {{ end }}
+          {{ end }}
         {{ end }}
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        # HTTP 1.1 support
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
       }
-    }
+
+      server {
+        listen 80;
+
+        gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+
+
+        {{ if eq $app "app" }}
+        server_name {{ $host }} *.{{ $host }};
+        {{ else }}
+        server_name {{ $app }}.{{ $host }} *.{{ $app }}.{{ $host }};
+        {{ end }}
+        proxy_buffering off;
+        # error_log /proc/self/fd/2;
+        # access_log /proc/self/fd/1;
+
+        location / {
+          {{ if eq $app "app" }}
+            proxy_pass http://{{ $host }};
+          {{ else }}
+            proxy_pass http://{{ $app }}.{{ $host }};
+          {{ end }}
+          proxy_set_header Host $http_host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+
+          # HTTP 1.1 support
+          proxy_http_version 1.1;
+          proxy_set_header Connection "";
+        }
+      }
+    {{ end }}
   {{ end }}
-{{ end }}
 
-# default server
-server {
-  listen 80 default_server;
-  server_name reception.dev;
-  # error_log /proc/self/fd/2;
-  # access_log /proc/self/fd/1;
+  # default server
+  server {
+    listen 80 default_server;
+    server_name reception.dev;
+    # error_log /proc/self/fd/2;
+    # access_log /proc/self/fd/1;
 
-  location / {
-      root   html;
-      index  index.html index.htm;
+    location / {
+        root   html;
+        index  index.html index.htm;
+    }
   }
-}
 </pre>
 </html>
