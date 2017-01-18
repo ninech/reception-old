@@ -51,6 +51,10 @@ Now you shall start *dnsmasq*:
     systemctl enable dnsmasq
     systemctl start dnsmasq
 
+Clone this repository if you haven't done so already:
+
+    git clone https://github.com/ninech/reception.git && cd reception
+
 Finally fire up the Docker container:
 
     docker-compose up
@@ -81,6 +85,10 @@ At last, start the services:
 
     sudo brew services start nginx
     sudo brew services start dnsmasq
+
+Clone this repository if you haven't done so already:
+
+    git clone https://github.com/ninech/reception.git && cd reception
 
 In the current directory, start `docker-gen` (and leave it running!) like this
 
