@@ -10,7 +10,7 @@ It's built around [docker-gen](https://github.com/jwilder/docker-gen),
 
 ## About
 
-This project uses docker-gen to query docker for any docker-compose projects that are running. For every container of those projects that exposes a port (i.e. there's an `ports:` line in your `docker-compose.yml`) it creates an entry on the overview page and a virtual host in nginx. We configure dnsmasq to make sure that '_anything_.docker' resolves to *localhost*. Therefore you get nice links like *yourcontainer.docker* that resolve to your container. Even as you fire up and shut down new docker-compose projects, docker-gen will update the entry page and the vhost configuration.
+This project uses docker-gen to query docker for any docker-compose projects that are running. For every container of those projects that exposes a port (i.e. there's an `ports:` line in your `docker-compose.yml`) it creates an entry on the overview page and a virtual host in nginx. We configure dnsmasq to make sure that '_anything_.docker' resolves to *localhost*. Therefore, you get nice links like *yourcontainer.docker* that resolves to your container. Even as you fire up and shut down new docker-compose projects, docker-gen will update the entry page and the vhost configuration.
 
 ## Installation
 
