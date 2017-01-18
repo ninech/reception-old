@@ -6,6 +6,12 @@ It's built around [docker-gen](https://github.com/jwilder/docker-gen),
 [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html) and
 [nginx](https://nginx.org/) reverse proxies.
 
+![A screenshot of the application.](https://cloud.githubusercontent.com/assets/804532/22060077/b49f6a2a-dd6f-11e6-9466-88ec8ab4a480.png)
+
+## About
+
+This project uses docker-gen to query docker for any docker-compose projects that are running. For every container of those projects that exposes a port (i.e. there's an `ports:` line in your `docker-compose.yml`) it creates an entry on the overview page and a virtual host in nginx. We configure dnsmasq to make sure that '_anything_.docker' resolves to *localhost*. Therefore you get nice links like *yourcontainer.docker* that resolve to your container. Even as you fire up and shut down new docker-compose projects, docker-gen will update the entry page and the vhost configuration.
+
 ## Installation
 
 For resolving the `.docker` local top-level domain to `localhost`, changes to
@@ -162,15 +168,39 @@ tail -f /usr/local/var/log/docker-gen.log
 tail -f /usr/local/var/log/nginx/*
 ```
 
-### Investigate your setup
+### docker-compose projects can't start because of port conflicts
 
-#### Is dnsmasq running?
+Most probably you assigned a fixed port mapping for any exposed ports. Look for something like the following:
+
+```yml
+version: 2
+services:
+  app:
+    ports:
+      -- "80:80"
+```
+
+In the case above, you would just replace `"80:80"` with `80`.
+
+### Nginx does not update
+
+If the overview page does not update and *\*.docker* links to new docker-compose projects do not work, then there might be a problem with any of your currently running *docker-compose* projects. (Most likely the problem's with the most recently started project!)
+
+Check the following in any of your docker-compose projects:
+
+* Do you only export the ports you need?
+  * Remove any port you don't need to connect to!
+* Does any container export more than one port?
+  * Either make sure that one of the exposed ports is either 80 or 3000.
+  * Or add an environment variable to that container called `VIRTUAL_PORT`. It's value must be the port number that is the http port for that container.
+
+### Is dnsmasq running?
 
 `dig +short foobar.docker @::1` should print `127.0.0.1`.
 
 If it doesn't, it means that *dnsmasq* is not running.
 
-#### Is the DNS cache outdated?
+### Is the DNS cache outdated?
 
 _Note:_ dnsmasq should be up and running at this stage (see above).
 
