@@ -82,7 +82,7 @@ At last, start the services:
     sudo brew services start nginx
     sudo brew services start dnsmasq
 
-In  the current directory, start `docker-gen` like this
+In the current directory, start `docker-gen` (and leave it running!) like this
 
     sudo docker-gen -config docker-gen.osx.conf
 
@@ -142,3 +142,42 @@ without any problems. This way you avoid port collisions across projects.
         image: postgresql
         ports:
           - 5432:5432    <----- and _not_ like this
+
+## Troubleshooting
+
+### Log files for macOS
+
+The logs are located under `/usr/local/var/log`:
+
+```shell
+tail -f /usr/local/var/log/docker-gen.log
+tail -f /usr/local/var/log/nginx/*
+```
+
+### Investigate your setup
+
+#### Is dnsmasq running?
+
+`dig +short foobar.docker @::1` should print `127.0.0.1`.
+
+If it doesn't, it means that *dnsmasq* is not running.
+
+#### Is the DNS cache outdated?
+
+_Note:_ dnsmasq should be up and running at this stage (see above).
+
+`nslookup foobar.docker` should resolve to `127.0.0.1`.
+
+If it doesn't, please flush the DNS cache:
+
+```shell
+# macOS
+sudo killall -HUP mDNSResponder
+
+# Linux
+systemctl restart named
+
+# or
+
+systemctl restart nscd
+```
