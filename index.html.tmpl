@@ -1,151 +1,187 @@
+<!DOCTYPE html>
 <html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 <title>Docker Reception</title>
-<h1>Online Projects</h1>
-<ul>
-{{ range $project, $containers := groupByLabel $ "com.docker.compose.project" }}
-  {{ $host := replace "_host_.docker" "_host_" $project 1 }}
-  {{ range $app, $containers := groupByLabel $ "com.docker.compose.service" }}
-    {{ $app := trim $app }}
-    {{ $host := trim $host }}
 
-    {{ if eq $app "app" }}
-    <li><a href="http://{{ $host }}">{{$project}}</a></li>
-    {{ else }}
-    <li><a href="http://{{ $app }}.{{ $host }}">{{$app}}</a></li>
-    {{ end }}
-  {{ end }}
-{{ end }}
-</ul>
-<hr>
-<h3>Current Nginx Config <button id="confToggle">Show</button></h3>
-<script>
-tgl = function() {
-  "use stric";
-
-  var visible = false
-  var toggleButton = document.querySelector("#confToggle")
-  var configPre = document.querySelector("#config")
-
-  toggleConfigVisibility = function() {
-    if (visible) {
-      configPre.style.display = 'none'
-      toggleButton.innerText = 'Show'
-    } else {
-      configPre.style.display = 'block'
-      toggleButton.innerText = 'Hide'
-    }
-    visible = !visible
-  }
-
-  toggleButton.addEventListener('click',toggleConfigVisibility)
+<style>
+.row {
+  margin-top: 1em;
+  margin-bottom: 2em;
 }
+.card {
+  margin-bottom: 1em;
+}
+.navbar {
+  background-color: #e3f2fd;
+}
+</style>
 
-window.addEventListener('load', tgl)
-</script>
-<pre id="config" style="display: none">
-{{ range $project, $containers := groupByLabel $ "com.docker.compose.project" }}
-  {{ $host := replace "_host_.docker" "_host_" $project 1 }}
+<div class="container">
+  <nav class="navbar fixed-bottom">
+    <a class="navbar-brand" href="#">
+      by
+      <img src="https://camo.githubusercontent.com/79d17a7da92ce2fc6999f6e8ea6c4c2264e5a484/68747470733a2f2f626c6f672e6e696e652e63682f6173736574732f6c6f676f2e706e67"
+           height="30" alt="nine.ch">
+    </a>
+  </nav>
 
-  ##
-  # {{ $project }} ({{ len $containers }} containers)
-  ##
+  <div class="row">
+    <div class="col">
+      <h1><small class="text-muted">ℹ️</small> Reception</h1>
+    </div>
+  </div>
+  <div class="row">
+  {{ range $project, $containers := groupByLabel $ "com.docker.compose.project" }}
+    {{ $host := replace "_host_.docker" "_host_" $project 1 }}
+    <div class="col-sm-4">
+      <div class="card">
+        <div class="card-header">
+          <h3>{{ $project }}</h3> http://*.{{ $host }}
+        </div>
+        <div class="card-block">
+          {{ range $app, $containers := groupByLabel $containers "com.docker.compose.service" }}
+            {{ $app := trim $app }}
+            {{ $host := trim $host }}
 
-  {{ range $app, $containers := groupByLabel $ "com.docker.compose.service" }}
-    {{ $app := trim $app }}
-    {{ $host := trim $host }}
-
-    ##
-    # {{ $project }}.{{ $app }} ({{ len $containers }} containers)
-    ##
-
-    {{ if eq $app "app" }}
-      upstream {{ $host }} {
-    {{ else }}
-      upstream {{ $app }}.{{ $host }} {
-    {{ end }}
-      {{ range $index, $value := $containers }}
-        {{ $addrLen := len $value.Addresses }}
-        {{ $network := index $value.Networks 0 }}
-
-        # {{$value.Name}}
-        # Addresses: {{$addrLen}}
-
-        {{/* If only 1 port exposed, use that */}}
-        {{ if eq $addrLen 1 }}
-          {{ with $address := index $value.Addresses 0 }}
-            # server {{ $network.IP }}:{{ $address.Port }};
-            server localhost:{{ $address.HostPort }};
-          {{ end }}
-
-        {{/* If more than one port exposed, use the one matching VIRTUAL_PORT env var */}}
-        {{ else if $value.Env.VIRTUAL_PORT }}
-          {{ range $i, $address := $value.Addresses }}
-            {{ if eq $address.Port $value.Env.VIRTUAL_PORT }}
-              # server {{ $network.IP }}:{{ $address.Port }};
-              server localhost:{{ $address.HostPort }};
+            {{ if eq $app "app" }}
+              <a href="http://{{ $host }}" target="_blank" class="btn btn-primary">
+                {{$project}}
+              </a>
+            {{ else }}
+              <a href="http://{{ $app }}.{{ $host }}" target="_blank" class="btn btn-secondary">
+                {{$app}}
+              </a>
             {{ end }}
           {{ end }}
+        </div>
+      </div>
+    </div>
+  {{ end }}
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <div class="card-header">
+          <button class="btn btn-sm btn-link" type="button" data-toggle="collapse" data-target="#config" aria-expanded="false" aria-controls="config">
+            👨‍💻 Show nginx config
+          </button>
+        </div>
+        <div class="card-block collapse" id="config">
+          <pre><code>
+  {{ range $project, $containers := groupByLabel $ "com.docker.compose.project" }}
+    {{ $host := replace "_host_.docker" "_host_" $project 1 }}
 
-        {{/* Else default to standard web port 80 */}}
-        {{ else }}
-          {{ range $i, $address := $value.Addresses }}
-            {{ if eq $address.Port "80" }}
-              # server {{ $network.IP }}:{{ $address.Port }};
-              server localhost:{{ $address.HostPort }};
-            {{ else if eq $address.Port "3000" }}
-              # server {{ $network.IP }}:{{ $address.Port }};
-              server localhost:{{ $address.HostPort }};
-            {{ end }}
-          {{ end }}
-        {{ end }}
-      {{ end }}
-    }
+    ##
+    # {{ $project }} ({{ len $containers }} containers)
+    ##
 
-    server {
-      listen 80;
+    {{ range $app, $containers := groupByLabel $containers "com.docker.compose.service" }}
+      {{ $app := trim $app }}
+      {{ $host := trim $host }}
 
-      gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
-
+      ##
+      # {{ $project }}.{{ $app }} ({{ len $containers }} containers)
+      ##
 
       {{ if eq $app "app" }}
-      server_name {{ $host }};
+        upstream {{ $host }} {
       {{ else }}
-      server_name {{ $app }}.{{ $host }};
+        upstream {{ $app }}.{{ $host }} {
       {{ end }}
-      proxy_buffering off;
-      # error_log /proc/self/fd/2;
-      # access_log /proc/self/fd/1;
+        {{ range $index, $value := $containers }}
+          {{ $addrLen := len $value.Addresses }}
+          {{ $network := index $value.Networks 0 }}
 
-      location / {
-        {{ if eq $app "app" }}
-          proxy_pass http://{{ $host }};
-        {{ else }}
-          proxy_pass http://{{ $app }}.{{ $host }};
+          # {{$value.Name}}
+          # Addresses: {{$addrLen}}
+
+          {{/* If only 1 port exposed, use that */}}
+          {{ if eq $addrLen 1 }}
+            {{ with $address := index $value.Addresses 0 }}
+              # server {{ $network.IP }}:{{ $address.Port }};
+              server localhost:{{ $address.HostPort }};
+            {{ end }}
+
+          {{/* If more than one port exposed, use the one matching VIRTUAL_PORT env var */}}
+          {{ else if $value.Env.VIRTUAL_PORT }}
+            {{ range $i, $address := $value.Addresses }}
+              {{ if eq $address.Port $value.Env.VIRTUAL_PORT }}
+                # server {{ $network.IP }}:{{ $address.Port }};
+                server localhost:{{ $address.HostPort }};
+              {{ end }}
+            {{ end }}
+
+          {{/* Else default to standard web port 80 */}}
+          {{ else }}
+            {{ range $i, $address := $value.Addresses }}
+              {{ if eq $address.Port "80" }}
+                # server {{ $network.IP }}:{{ $address.Port }};
+                server localhost:{{ $address.HostPort }};
+              {{ else if eq $address.Port "3000" }}
+                # server {{ $network.IP }}:{{ $address.Port }};
+                server localhost:{{ $address.HostPort }};
+              {{ end }}
+            {{ end }}
+          {{ end }}
         {{ end }}
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        # HTTP 1.1 support
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
       }
-    }
+
+      server {
+        listen 80;
+
+        gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+
+
+        {{ if eq $app "app" }}
+        server_name {{ $host }} *.{{ $host }};
+        {{ else }}
+        server_name {{ $app }}.{{ $host }} *.{{ $app }}.{{ $host }};
+        {{ end }}
+        proxy_buffering off;
+        # error_log /proc/self/fd/2;
+        # access_log /proc/self/fd/1;
+
+        location / {
+          {{ if eq $app "app" }}
+            proxy_pass http://{{ $host }};
+          {{ else }}
+            proxy_pass http://{{ $app }}.{{ $host }};
+          {{ end }}
+          proxy_set_header Host $http_host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+
+          # HTTP 1.1 support
+          proxy_http_version 1.1;
+          proxy_set_header Connection "";
+        }
+      }
+    {{ end }}
   {{ end }}
-{{ end }}
 
-# default server
-server {
-  listen 80 default_server;
-  server_name reception.dev;
-  # error_log /proc/self/fd/2;
-  # access_log /proc/self/fd/1;
+  # default server
+  server {
+    listen 80 default_server;
+    server_name reception.dev;
+    # error_log /proc/self/fd/2;
+    # access_log /proc/self/fd/1;
 
-  location / {
-      root   html;
-      index  index.html index.htm;
+    location / {
+        root   html;
+        index  index.html index.htm;
+    }
   }
-}
-</pre>
+          </code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </html>
