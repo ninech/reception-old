@@ -191,7 +191,7 @@ Check the following in any of your docker-compose projects:
 * Do you only export the ports you need?
   * Remove any port you don't need to connect to!
 * Does any container export more than one port?
-  * Either make sure that one of the exposed ports is either 80 or 3000.
+  * Either make sure that one of the exposed ports is either 80, 8080 or 3000.
   * Or add an environment variable to that container called `VIRTUAL_PORT`. It's value must be the port number that is the http port for that container.
 
 ### Is dnsmasq running?

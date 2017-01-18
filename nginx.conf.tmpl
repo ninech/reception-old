@@ -47,6 +47,9 @@
             {{ if eq $address.Port "80" }}
               # server {{ $network.IP }}:{{ $address.Port }};
               server localhost:{{ $address.HostPort }};
+            {{ else if eq $address.Port "8080" }}
+              # server {{ $network.IP }}:{{ $address.Port }};
+              server localhost:{{ $address.HostPort }};
             {{ else if eq $address.Port "3000" }}
               # server {{ $network.IP }}:{{ $address.Port }};
               server localhost:{{ $address.HostPort }};
