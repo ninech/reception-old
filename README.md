@@ -73,7 +73,7 @@ Install *nginx*, *dnsmasq* and *docker-gen* using *[homebrew](http://brew.sh/)*:
 
     brew install nginx dnsmasq docker-gen
 
-Now, configure add the following two lines to `/usr/local/etc/dnsmasq.conf`:
+Now, add the following two lines to `/usr/local/etc/dnsmasq.conf`:
 
     address=/#/127.0.0.1
     address=/#/::1
@@ -125,8 +125,8 @@ The "main" container must be called `app`:
 
 In your `docker-compose.yaml` file, you shall only expose the 'main' HTTP port,
 because it's hard to reliably determine the HTTP port for the reverse proxy.
-Also, you should not give a specific local port when you work on multiple
-projects. The reverse proxy will bind to the random port assigned by Docker
+Also, you should not give a specific local port.
+The reverse proxy will bind to the random port assigned by Docker
 without any problems. This way you avoid port collisions across projects.
 
 **Do**
