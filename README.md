@@ -69,9 +69,10 @@ Try to go to http://reception.docker.
 
 ### macOS
 
-Install *nginx*, *dnsmasq* and *docker-gen* using *[homebrew](http://brew.sh/)*:
+We assume you have *docker* and *docker-compose* installed somehow!
 
-    brew install nginx dnsmasq docker-gen
+Install *reception* using [homebrew](https://brew.sh/):
+    brew install ninech/reception/reception
 
 Now, add the following two lines to `/usr/local/etc/dnsmasq.conf`:
 
@@ -91,20 +92,7 @@ At last, start the services:
 
     sudo brew services start nginx
     sudo brew services start dnsmasq
-
-Clone this repository if you haven't done so already:
-
-    git clone https://github.com/ninech/reception.git && cd reception
-
-In the current directory, start `docker-gen` (and leave it running!) like this
-
-    sudo docker-gen -config docker-gen.osx.conf
-
-You can also install a *LaunchDaemon*, but you need to edit the file first and
-adjust the path to the `docker-gen.osx.conf` file!
-
-    sudo cp ch.nine.reception.docker-gen.plist /Library/LaunchDaemons/
-    sudo launchctl load -w /Library/LaunchDaemons/ch.nine.reception.docker-gen.plist
+    sudo brew services start reception
 
 Now try to go to http://reception.docker.
 
