@@ -92,7 +92,7 @@ At last, start the services:
 
     sudo brew services start nginx
     sudo brew services start dnsmasq
-    sudo brew services start reception
+    sudo brew services start ninech/reception/reception
 
 Now try to go to http://reception.docker.
 
