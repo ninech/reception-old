@@ -72,6 +72,7 @@ Try to go to http://reception.docker.
 We assume you have *docker* and *docker-compose* installed somehow!
 
 Install *reception* using [homebrew](https://brew.sh/):
+
     brew install ninech/reception/reception
 
 Now, add the following two lines to `/usr/local/etc/dnsmasq.conf`:
