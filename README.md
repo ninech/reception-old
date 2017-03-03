@@ -36,12 +36,6 @@ So, install dnsmasq using your package manager:
 Edit the dnsmasq configuration and add the following lines.
 The file is probably in `/etc/dnsmasq.conf`.
 
-    address=/#/127.0.0.1
-    address=/#/::1
-
-**Warning:** If you already use *dnsmasq* for domain resolving, you must not add
-the lines above, but those below:
-
     address=/docker/127.0.0.1
     address=/docker/::1
 
@@ -77,8 +71,8 @@ Install *reception* using [homebrew](https://brew.sh/):
 
 Now, add the following two lines to `/usr/local/etc/dnsmasq.conf`:
 
-    address=/#/127.0.0.1
-    address=/#/::1
+    address=/docker/127.0.0.1
+    address=/docker/::1
 
 This makes all requests to *dnsmasq* resolve to `localhost`.
 Next you need to register *dnsmasq* as the resolver for the `docker` TLD. Run the
