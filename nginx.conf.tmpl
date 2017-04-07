@@ -29,7 +29,7 @@
         {{ if eq $addrLen 1 }}
           {{ with $address := index $value.Addresses 0 }}
             # server {{ $network.IP }}:{{ $address.Port }};
-            server localhost:{{ $address.HostPort }};
+            server 127.0.0.1:{{ $address.HostPort }};
           {{ end }}
 
         {{/* If more than one port exposed, use the one matching VIRTUAL_PORT env var */}}
@@ -37,7 +37,7 @@
           {{ range $i, $address := $value.Addresses }}
             {{ if eq $address.Port $value.Env.VIRTUAL_PORT }}
               # server {{ $network.IP }}:{{ $address.Port }};
-              server localhost:{{ $address.HostPort }};
+              server 127.0.0.1:{{ $address.HostPort }};
             {{ end }}
           {{ end }}
 
@@ -46,13 +46,13 @@
           {{ range $i, $address := $value.Addresses }}
             {{ if eq $address.Port "80" }}
               # server {{ $network.IP }}:{{ $address.Port }};
-              server localhost:{{ $address.HostPort }};
+              server 127.0.0.1:{{ $address.HostPort }};
             {{ else if eq $address.Port "8080" }}
               # server {{ $network.IP }}:{{ $address.Port }};
-              server localhost:{{ $address.HostPort }};
+              server 127.0.0.1:{{ $address.HostPort }};
             {{ else if eq $address.Port "3000" }}
               # server {{ $network.IP }}:{{ $address.Port }};
-              server localhost:{{ $address.HostPort }};
+              server 127.0.0.1:{{ $address.HostPort }};
             {{ end }}
           {{ end }}
         {{ end }}
