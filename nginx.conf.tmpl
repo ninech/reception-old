@@ -18,6 +18,8 @@
     {{ else }}
       upstream {{ $app }}.{{ $host }} {
     {{ end }}
+        {{/* random server entry, because at least one server has to be defined to be non-backup. */}}
+        server 127.0.0.1:1 down;
       {{ range $index, $value := $containers }}
         {{ $addrLen := len $value.Addresses }}
         {{ $network := index $value.Networks 0 }}
@@ -28,6 +30,7 @@
         {{/* If only 1 port exposed, use that */}}
         {{ if eq $addrLen 1 }}
           {{ with $address := index $value.Addresses 0 }}
+            # Only one port
             # server {{ $network.IP }}:{{ $address.Port }};
             server 127.0.0.1:{{ $address.HostPort }};
           {{ end }}
@@ -36,6 +39,7 @@
         {{ else if $value.Env.VIRTUAL_PORT }}
           {{ range $i, $address := $value.Addresses }}
             {{ if eq $address.Port $value.Env.VIRTUAL_PORT }}
+              # Port from VIRTUAL_PORT env var
               # server {{ $network.IP }}:{{ $address.Port }};
               server 127.0.0.1:{{ $address.HostPort }};
             {{ end }}
@@ -44,20 +48,33 @@
         {{/* Else default to standard web port 80 */}}
         {{ else }}
           {{ range $i, $address := $value.Addresses }}
-            {{ if eq $address.Port "80" }}
-              # server {{ $network.IP }}:{{ $address.Port }};
-              server 127.0.0.1:{{ $address.HostPort }};
-            {{ else if eq $address.Port "8080" }}
-              # server {{ $network.IP }}:{{ $address.Port }};
-              server 127.0.0.1:{{ $address.HostPort }};
-            {{ else if eq $address.Port "3000" }}
-              # server {{ $network.IP }}:{{ $address.Port }};
-              server 127.0.0.1:{{ $address.HostPort }};
+            {{ if $address.HostPort }}
+              {{ if eq $address.Port "80" }}
+                # Port is 80
+                # server {{ $network.IP }}:{{ $address.Port }};
+                server 127.0.0.1:{{ $address.HostPort }};
+              {{ else if eq $address.Port "8080" }}
+                # Port is 8080
+                # server {{ $network.IP }}:{{ $address.Port }};
+                server 127.0.0.1:{{ $address.HostPort }};
+              {{ else if eq $address.Port "3000" }}
+                # Port is 3000
+                # server {{ $network.IP }}:{{ $address.Port }};
+                server 127.0.0.1:{{ $address.HostPort }};
+              {{ end }}
             {{ end }}
           {{ end }}
         {{ end }}
+
+        {{/* adds all HostPorts as backup servers */}}
+        {{ range $i, $address := $value.Addresses }}
+          {{ if $address.HostPort }}
+            # server {{ $network.IP }}:{{ $address.Port }};
+            server 127.0.0.1:{{ $address.HostPort }} backup;
+          {{ end }}
+        {{ end }}
       {{ end }}
-    }
+      }
 
     server {
       listen 80;
