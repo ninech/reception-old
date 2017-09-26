@@ -1,5 +1,7 @@
 # Reception
 
+⚠️ **As this solution has not fullfilled our expectations, this version is discontinued. See [ninech/reception](https://github.com/ninech/reception) for a complete rewrite in go.** ⚠️
+
 A dashboard and reverse proxy for your
 [**docker-compose**](https://docs.docker.com/compose/) projects.
 It's built around [docker-gen](https://github.com/jwilder/docker-gen),
